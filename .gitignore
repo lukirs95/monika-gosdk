@@ -1,0 +1,5 @@
+# MacOS system file
+.DS_Store
+
+# Binaries compiled by Go
+build/
