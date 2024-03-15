@@ -6,9 +6,10 @@ import (
 )
 
 type User struct {
-	Username Username `json:"username"`
-	Password Password `json:"password"`
-	Role     UserRole `json:"role"`
+	UserId   int64    `json:"userId,omitempty"`
+	Username Username `json:"username,omitempty"`
+	Password Password `json:"password,omitempty"`
+	Role     UserRole `json:"role,omitempty"`
 }
 
 type Username string
