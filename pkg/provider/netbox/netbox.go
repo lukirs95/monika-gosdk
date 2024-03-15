@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/lukirs95/monika_gosdk/pkg/types"
+	"github.com/lukirs95/monika-gosdk/pkg/types"
 )
 
 type Netbox struct {

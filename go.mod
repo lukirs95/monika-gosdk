@@ -1,3 +1,3 @@
-module github.com/lukirs95/monika_gosdk
+module github.com/lukirs95/monika-gosdk
 
 go 1.21.1

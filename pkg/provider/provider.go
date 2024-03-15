@@ -3,8 +3,8 @@ package provider
 import (
 	"context"
 
-	"github.com/lukirs95/monika_gosdk/pkg/provider/netbox"
-	"github.com/lukirs95/monika_gosdk/pkg/types"
+	"github.com/lukirs95/monika-gosdk/pkg/provider/netbox"
+	"github.com/lukirs95/monika-gosdk/pkg/types"
 )
 
 type DeviceProvider interface {
