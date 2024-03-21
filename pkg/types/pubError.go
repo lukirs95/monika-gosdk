@@ -17,3 +17,7 @@ const (
 	PubErrorSeverity_MID     PubErrorSeverity = "MID"
 	PubErrorSeverity_HIGHEST PubErrorSeverity = "HIGHEST"
 )
+
+type PubErrorResponse struct {
+	ErrorId int64 `json:"errorId"`
+}
