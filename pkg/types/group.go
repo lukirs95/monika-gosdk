@@ -10,6 +10,6 @@ type GroupMember struct {
 	ModuleName string     `json:"modulename,omitempty"`
 	ModuleType ModuleType `json:"moduletype,omitempty"`
 	DeviceName string     `json:"devicename,omitempty"`
-	DeviceType string     `json:"devicetype,omitempty"`
+	DeviceType DeviceType `json:"devicetype,omitempty"`
 	Group      int64      `json:"group,omitempty"`
 }
