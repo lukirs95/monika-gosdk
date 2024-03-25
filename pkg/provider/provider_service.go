@@ -228,9 +228,10 @@ func (service *Service) sendUpdates() {
 	}
 }
 
-func (service *Service) connect() error {
+func (service *Service) connect(port int) error {
 	body, err := json.Marshal(&types.Driver{
 		DeviceType: service.provider.GetDeviceType(),
+		Port:       port,
 	})
 	if err != nil {
 		return err
@@ -275,7 +276,7 @@ func (service *Service) listenForUpdates(updateChan chan interface{}) {
 }
 
 func (service *Service) Listen(ctx context.Context, port int, updateChan chan interface{}) error {
-	if err := service.connect(); err != nil {
+	if err := service.connect(port); err != nil {
 		return err
 	}
 	defer service.disconnect()
