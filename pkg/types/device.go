@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync/atomic"
 )
@@ -26,7 +27,7 @@ type Device interface {
 }
 
 func NewDevice(id DeviceId, deviceType DeviceType, name string) Device {
-	return &DeviceImpl{
+	return &deviceImpl{
 		Id:          id,
 		Type:        deviceType,
 		Name:        name,
@@ -39,7 +40,27 @@ func NewDevice(id DeviceId, deviceType DeviceType, name string) Device {
 	}
 }
 
-type DeviceImpl struct {
+func DevicesFromJSON(decoder *json.Decoder) ([]Device, error) {
+	var rawDevices []deviceImpl
+	if err := decoder.Decode(&rawDevices); err != nil {
+		return nil, err
+	}
+	devices := make([]Device, 0)
+	for index := range rawDevices {
+		devices = append(devices, &rawDevices[index])
+	}
+	return devices, nil
+}
+
+func DeviceFromJSON(decoder *json.Decoder) (Device, error) {
+	device := new(deviceImpl)
+	if err := decoder.Decode(device); err != nil {
+		return nil, err
+	}
+	return device, nil
+}
+
+type deviceImpl struct {
 	Id          DeviceId        `json:"deviceId"`
 	Type        DeviceType      `json:"type"`
 	Name        string          `json:"name"`
@@ -61,49 +82,49 @@ type DeviceUpdate struct {
 	Modules []ModuleUpdate `json:"modules"`
 }
 
-func (device *DeviceImpl) GetId() DeviceId {
+func (device *deviceImpl) GetId() DeviceId {
 	return device.Id
 }
 
-func (device *DeviceImpl) SetName(newName string) {
+func (device *deviceImpl) SetName(newName string) {
 	if device.Name != newName && newName != "" {
 		device.Name = newName
 		device.modified.Store(true)
 	}
 }
 
-func (device *DeviceImpl) GetName() string {
+func (device *deviceImpl) GetName() string {
 	return device.Name
 }
 
-func (device *DeviceImpl) GetStatus() DeviceStatus {
+func (device *deviceImpl) GetStatus() DeviceStatus {
 	return device.Status
 }
 
-func (device *DeviceImpl) SetStatus(newStatus DeviceStatus) {
+func (device *deviceImpl) SetStatus(newStatus DeviceStatus) {
 	if device.Status != newStatus {
 		device.Status = newStatus
 		device.modified.Store(true)
 	}
 }
 
-func (device *DeviceImpl) SetControlIP(controlIP string) {
+func (device *deviceImpl) SetControlIP(controlIP string) {
 	device.ControlIP = controlIP
 }
 
-func (device *DeviceImpl) GetControlIP() string {
+func (device *deviceImpl) GetControlIP() string {
 	return device.ControlIP
 }
 
-func (device *DeviceImpl) SetControlPort(controlPort int) {
+func (device *deviceImpl) SetControlPort(controlPort int) {
 	device.ControlPort = controlPort
 }
 
-func (device *DeviceImpl) GetControlPort() int {
+func (device *deviceImpl) GetControlPort() int {
 	return device.ControlPort
 }
 
-func (device *DeviceImpl) AddAction(newControl DeviceControl, action DeviceAction) {
+func (device *deviceImpl) AddAction(newControl DeviceControl, action DeviceAction) {
 	device.actions[newControl] = action
 
 	for _, control := range device.Controls {
@@ -114,14 +135,14 @@ func (device *DeviceImpl) AddAction(newControl DeviceControl, action DeviceActio
 	device.Controls = append(device.Controls, newControl)
 }
 
-func (device *DeviceImpl) FireAction(control DeviceControl) error {
+func (device *deviceImpl) FireAction(control DeviceControl) error {
 	if action, ok := device.actions[control]; ok {
 		return action(device)
 	}
 	return fmt.Errorf("no such action defined")
 }
 
-func (device *DeviceImpl) addModuleType(newModuleType ModuleType) {
+func (device *deviceImpl) addModuleType(newModuleType ModuleType) {
 	for _, moduleType := range device.ModuleTypes {
 		if newModuleType == moduleType {
 			return
@@ -130,20 +151,20 @@ func (device *DeviceImpl) addModuleType(newModuleType ModuleType) {
 	device.ModuleTypes = append(device.ModuleTypes, newModuleType)
 }
 
-func (device *DeviceImpl) GetModuleTypes() []ModuleType {
+func (device *deviceImpl) GetModuleTypes() []ModuleType {
 	return device.ModuleTypes
 }
 
-func (device *DeviceImpl) AddModule(module Module) {
+func (device *deviceImpl) AddModule(module Module) {
 	device.addModuleType(module.GetType())
 	device.Modules = append(device.Modules, module)
 }
 
-func (device *DeviceImpl) GetModules() []Module {
+func (device *deviceImpl) GetModules() []Module {
 	return device.Modules
 }
 
-func (device *DeviceImpl) GetModulesByType(moduleType ModuleType) []Module {
+func (device *deviceImpl) GetModulesByType(moduleType ModuleType) []Module {
 	modulesByType := make([]Module, 0)
 	for _, module := range device.Modules {
 		if module.GetType() == moduleType {
@@ -154,7 +175,7 @@ func (device *DeviceImpl) GetModulesByType(moduleType ModuleType) []Module {
 	return modulesByType
 }
 
-func (device *DeviceImpl) GetModule(moduleId ModuleId) Module {
+func (device *deviceImpl) GetModule(moduleId ModuleId) Module {
 	for _, module := range device.Modules {
 		if module.GetId() == moduleId {
 			return module
@@ -163,7 +184,7 @@ func (device *DeviceImpl) GetModule(moduleId ModuleId) Module {
 	return nil
 }
 
-func (device *DeviceImpl) Updated() *DeviceUpdate {
+func (device *deviceImpl) Updated() *DeviceUpdate {
 	updatedModules := make([]ModuleUpdate, 0)
 	for _, module := range device.Modules {
 		moduleUpdate := module.Updated()
