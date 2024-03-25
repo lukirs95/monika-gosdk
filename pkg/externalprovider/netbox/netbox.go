@@ -12,15 +12,21 @@ import (
 type Netbox struct {
 	server       string
 	apiKey       string
+	deviceType   types.DeviceType
 	deviceTypeID int
 }
 
-func NewNetbox(server string, apiKey string, deviceTypeID int) *Netbox {
+func NewNetbox(server string, apiKey string, deviceType types.DeviceType, deviceTypeID int) *Netbox {
 	return &Netbox{
 		server:       server,
 		apiKey:       apiKey,
+		deviceType:   deviceType,
 		deviceTypeID: deviceTypeID,
 	}
+}
+
+func (netbox *Netbox) GetDeviceType() types.DeviceType {
+	return netbox.deviceType
 }
 
 func (netbox *Netbox) GetDevices(ctx context.Context) ([]types.Device, error) {
@@ -45,10 +51,9 @@ func (netbox *Netbox) GetDevices(ctx context.Context) ([]types.Device, error) {
 	parsedDevices := make([]types.Device, 0)
 	for _, resDevice := range allResponses {
 		if resDevice.GetIP() != "" {
-			parsedDevices = append(parsedDevices, types.Device{
-				Name:      resDevice.GetName(),
-				ControlIP: resDevice.GetIP(),
-			})
+			newDevice := types.NewDevice(resDevice.GetId(), netbox.deviceType, resDevice.Name)
+			newDevice.SetControlIP(resDevice.GetIP())
+			parsedDevices = append(parsedDevices, newDevice)
 		}
 	}
 
