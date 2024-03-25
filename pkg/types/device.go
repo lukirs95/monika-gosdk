@@ -26,7 +26,7 @@ type Device interface {
 }
 
 func NewDevice(id DeviceId, deviceType DeviceType, name string) Device {
-	return &deviceImpl{
+	return &DeviceImpl{
 		Id:          id,
 		Type:        deviceType,
 		Name:        name,
@@ -39,7 +39,7 @@ func NewDevice(id DeviceId, deviceType DeviceType, name string) Device {
 	}
 }
 
-type deviceImpl struct {
+type DeviceImpl struct {
 	Id          DeviceId        `json:"deviceId"`
 	Type        DeviceType      `json:"type"`
 	Name        string          `json:"name"`
@@ -61,49 +61,49 @@ type DeviceUpdate struct {
 	Modules []ModuleUpdate `json:"modules"`
 }
 
-func (device *deviceImpl) GetId() DeviceId {
+func (device *DeviceImpl) GetId() DeviceId {
 	return device.Id
 }
 
-func (device *deviceImpl) SetName(newName string) {
+func (device *DeviceImpl) SetName(newName string) {
 	if device.Name != newName && newName != "" {
 		device.Name = newName
 		device.modified.Store(true)
 	}
 }
 
-func (device *deviceImpl) GetName() string {
+func (device *DeviceImpl) GetName() string {
 	return device.Name
 }
 
-func (device *deviceImpl) GetStatus() DeviceStatus {
+func (device *DeviceImpl) GetStatus() DeviceStatus {
 	return device.Status
 }
 
-func (device *deviceImpl) SetStatus(newStatus DeviceStatus) {
+func (device *DeviceImpl) SetStatus(newStatus DeviceStatus) {
 	if device.Status != newStatus {
 		device.Status = newStatus
 		device.modified.Store(true)
 	}
 }
 
-func (device *deviceImpl) SetControlIP(controlIP string) {
+func (device *DeviceImpl) SetControlIP(controlIP string) {
 	device.ControlIP = controlIP
 }
 
-func (device *deviceImpl) GetControlIP() string {
+func (device *DeviceImpl) GetControlIP() string {
 	return device.ControlIP
 }
 
-func (device *deviceImpl) SetControlPort(controlPort int) {
+func (device *DeviceImpl) SetControlPort(controlPort int) {
 	device.ControlPort = controlPort
 }
 
-func (device *deviceImpl) GetControlPort() int {
+func (device *DeviceImpl) GetControlPort() int {
 	return device.ControlPort
 }
 
-func (device *deviceImpl) AddAction(newControl DeviceControl, action DeviceAction) {
+func (device *DeviceImpl) AddAction(newControl DeviceControl, action DeviceAction) {
 	device.actions[newControl] = action
 
 	for _, control := range device.Controls {
@@ -114,14 +114,14 @@ func (device *deviceImpl) AddAction(newControl DeviceControl, action DeviceActio
 	device.Controls = append(device.Controls, newControl)
 }
 
-func (device *deviceImpl) FireAction(control DeviceControl) error {
+func (device *DeviceImpl) FireAction(control DeviceControl) error {
 	if action, ok := device.actions[control]; ok {
 		return action(device)
 	}
 	return fmt.Errorf("no such action defined")
 }
 
-func (device *deviceImpl) addModuleType(newModuleType ModuleType) {
+func (device *DeviceImpl) addModuleType(newModuleType ModuleType) {
 	for _, moduleType := range device.ModuleTypes {
 		if newModuleType == moduleType {
 			return
@@ -130,20 +130,20 @@ func (device *deviceImpl) addModuleType(newModuleType ModuleType) {
 	device.ModuleTypes = append(device.ModuleTypes, newModuleType)
 }
 
-func (device *deviceImpl) GetModuleTypes() []ModuleType {
+func (device *DeviceImpl) GetModuleTypes() []ModuleType {
 	return device.ModuleTypes
 }
 
-func (device *deviceImpl) AddModule(module Module) {
+func (device *DeviceImpl) AddModule(module Module) {
 	device.addModuleType(module.GetType())
 	device.Modules = append(device.Modules, module)
 }
 
-func (device *deviceImpl) GetModules() []Module {
+func (device *DeviceImpl) GetModules() []Module {
 	return device.Modules
 }
 
-func (device *deviceImpl) GetModulesByType(moduleType ModuleType) []Module {
+func (device *DeviceImpl) GetModulesByType(moduleType ModuleType) []Module {
 	modulesByType := make([]Module, 0)
 	for _, module := range device.Modules {
 		if module.GetType() == moduleType {
@@ -154,7 +154,7 @@ func (device *deviceImpl) GetModulesByType(moduleType ModuleType) []Module {
 	return modulesByType
 }
 
-func (device *deviceImpl) GetModule(moduleId ModuleId) Module {
+func (device *DeviceImpl) GetModule(moduleId ModuleId) Module {
 	for _, module := range device.Modules {
 		if module.GetId() == moduleId {
 			return module
@@ -163,7 +163,7 @@ func (device *deviceImpl) GetModule(moduleId ModuleId) Module {
 	return nil
 }
 
-func (device *deviceImpl) Updated() *DeviceUpdate {
+func (device *DeviceImpl) Updated() *DeviceUpdate {
 	updatedModules := make([]ModuleUpdate, 0)
 	for _, module := range device.Modules {
 		moduleUpdate := module.Updated()

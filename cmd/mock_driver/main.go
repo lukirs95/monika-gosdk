@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/lukirs95/monika-gosdk/pkg/mocks"
@@ -24,5 +25,6 @@ func main() {
 		go mockDevice.Connect(ctx)
 	}
 
-	go service.Listen(ctx, 8090, updateChan)
+	err := service.Listen(ctx, 8090, updateChan)
+	fmt.Println(err)
 }
