@@ -12,8 +12,9 @@ import (
 type Netbox struct {
 	server       string
 	apiKey       string
-	deviceType   types.DeviceType
 	deviceTypeID int
+	deviceType   types.DeviceType
+	devices      []types.Device
 }
 
 func NewNetbox(server string, apiKey string, deviceType types.DeviceType, deviceTypeID int) *Netbox {
@@ -22,6 +23,7 @@ func NewNetbox(server string, apiKey string, deviceType types.DeviceType, device
 		apiKey:       apiKey,
 		deviceType:   deviceType,
 		deviceTypeID: deviceTypeID,
+		devices:      make([]types.Device, 0),
 	}
 }
 
@@ -29,35 +31,38 @@ func (netbox *Netbox) GetDeviceType() types.DeviceType {
 	return netbox.deviceType
 }
 
-func (netbox *Netbox) GetDevices(ctx context.Context) ([]types.Device, error) {
+func (netbox *Netbox) FetchDevices(ctx context.Context) error {
 	path := "api/dcim/devices"
 	query := fmt.Sprintf("?device_type_id=%d", netbox.deviceTypeID)
 	endpoint := fmt.Sprintf("%s/%s/%s", netbox.server, path, query)
 
 	responses, err := netbox.request(ctx, endpoint)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	allResponses := make([]Device, 0)
 	for _, response := range responses {
 		var resDevices []Device
 		if err := json.Unmarshal(response, &resDevices); err != nil {
-			return nil, err
+			return err
 		}
 		allResponses = append(allResponses, resDevices...)
 	}
 
-	parsedDevices := make([]types.Device, 0)
 	for _, resDevice := range allResponses {
 		if resDevice.GetIP() != "" {
 			newDevice := types.NewDevice(resDevice.GetId(), netbox.deviceType, resDevice.Name)
 			newDevice.SetControlIP(resDevice.GetIP())
-			parsedDevices = append(parsedDevices, newDevice)
+			netbox.devices = append(netbox.devices, newDevice)
 		}
 	}
 
-	return parsedDevices, nil
+	return nil
+}
+
+func (netbox *Netbox) GetDevices() []types.Device {
+	return netbox.devices
 }
 
 func (netbox *Netbox) request(ctx context.Context, endpoint string) ([]json.RawMessage, error) {

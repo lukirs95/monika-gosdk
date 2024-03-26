@@ -4,27 +4,43 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/lukirs95/monika-gosdk/pkg/mocks"
-	"github.com/lukirs95/monika-gosdk/pkg/provider"
+	"github.com/lukirs95/monika-gosdk/pkg/driver"
+	"github.com/lukirs95/monika-gosdk/pkg/types"
 )
 
 func main() {
 	gatewayEndpoint := "http://127.0.0.1:8080"
-	mockProvider := provider.NewMockProvider()
+	mockProvider := NewMockProvider(types.DeviceType__GENERIC_DUMMY)
+	mockProvider.FetchDevices(context.Background())
+	mockDriver, err := driver.NewDriver(mockProvider)
+	if err != nil {
+		fmt.Print(err)
+		os.Exit(1)
+	}
 
-	service := provider.NewService(gatewayEndpoint, mockProvider, log.Default())
+	mockService := driver.NewService(gatewayEndpoint, mockDriver, log.Default())
+
+	mockService.AddErrorCheckIOlet(func(iolet *types.IOletUpdate) *types.Error {
+		if !iolet.Status.Running() {
+			return &types.Error{
+				Severity: types.IOletStatus_HIGH,
+				Message:  fmt.Sprintf("IOlet %s stopped!", iolet.Name),
+			}
+		}
+		return nil
+	})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	devices := mockProvider.GetDevices()
-	updateChan := make(chan interface{})
+	devices := mockDriver.GetDevices()
+	updateChan := make(chan types.Device, 100)
 	for _, device := range devices {
-		mockDevice := mocks.NewMockDevice(device, updateChan)
+		mockDevice := NewMockDevice(device, updateChan)
 		go mockDevice.Connect(ctx)
 	}
 
-	err := service.Listen(ctx, 8090, updateChan)
-	fmt.Println(err)
+	fmt.Print(mockService.Listen(ctx, 8090, updateChan))
 }

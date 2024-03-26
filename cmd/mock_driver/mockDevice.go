@@ -1,4 +1,4 @@
-package mocks
+package main
 
 import (
 	"context"
@@ -10,10 +10,10 @@ import (
 
 type MockDevice struct {
 	device        types.Device
-	triggerUpdate chan interface{}
+	triggerUpdate chan types.Device
 }
 
-func NewMockDevice(device types.Device, updateChan chan interface{}) *MockDevice {
+func NewMockDevice(device types.Device, updateChan chan types.Device) *MockDevice {
 	mock := &MockDevice{
 		device:        device,
 		triggerUpdate: updateChan,
@@ -87,14 +87,14 @@ func (mock *MockDevice) Connect(ctx context.Context) {
 
 func (mock *MockDevice) mockUpdate(currentTime time.Time) {
 	mock.device.SetName(currentTime.Format("15:04:05"))
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 }
 
 func (mock *MockDevice) deviceActionBoot(device types.Device) error {
 	currentStatus := mock.device.GetStatus()
 	currentStatus.SetONLINE(true)
 	mock.device.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	return nil
 }
 
@@ -102,7 +102,7 @@ func (mock *MockDevice) deviceActionShutDown(device types.Device) error {
 	currentStatus := mock.device.GetStatus()
 	currentStatus.SetONLINE(false)
 	mock.device.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	return nil
 }
 
@@ -110,13 +110,13 @@ func (mock *MockDevice) deviceActionReboot(device types.Device) error {
 	currentStatus := mock.device.GetStatus()
 	currentStatus.SetONLINE(false)
 	mock.device.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	go func(mock *MockDevice) {
 		time.Sleep(time.Second * 5)
 		currentStatus := mock.device.GetStatus()
 		currentStatus.SetONLINE(true)
 		mock.device.SetStatus(currentStatus)
-		<-mock.triggerUpdate
+		mock.triggerUpdate <- mock.device
 	}(mock)
 	return nil
 }
@@ -125,7 +125,7 @@ func (mock *MockDevice) moduleActionStart(module types.Module) error {
 	currentStatus := module.GetStatus()
 	currentStatus.SetOK(true)
 	module.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	return nil
 }
 
@@ -133,7 +133,7 @@ func (mock *MockDevice) moduleActionStop(module types.Module) error {
 	currentStatus := module.GetStatus()
 	currentStatus.SetOK(false)
 	module.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	return nil
 }
 
@@ -142,7 +142,7 @@ func (mock *MockDevice) ioletActionStart(iolet types.IOlet) error {
 	currentStatus.SetRunning(true)
 	currentStatus.SetReceiving(true)
 	iolet.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	return nil
 }
 
@@ -151,11 +151,6 @@ func (mock *MockDevice) ioletActionStop(iolet types.IOlet) error {
 	currentStatus.SetRunning(false)
 	currentStatus.SetReceiving(false)
 	iolet.SetStatus(currentStatus)
-	<-mock.triggerUpdate
+	mock.triggerUpdate <- mock.device
 	return nil
-}
-
-func GetMockDevice(deviceId string, name string) types.Device {
-	mockDevice := types.NewDevice(types.DeviceId(deviceId), types.DeviceType__GENERIC_DUMMY, name)
-	return mockDevice
 }
