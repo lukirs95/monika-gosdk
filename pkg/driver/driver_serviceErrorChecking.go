@@ -102,7 +102,7 @@ func (service *Service) reportModuleError(device *types.DeviceUpdate, module *ty
 		service.logger.Print(err)
 		return
 	}
-	service.deviceErrors[device.Id] = reportedError
+	service.moduleErrors[module.Id] = reportedError
 }
 
 func (service *Service) reportIOletError(device *types.DeviceUpdate, module *types.ModuleUpdate, iolet *types.IOletUpdate, ioletError *types.Error) {
@@ -124,7 +124,7 @@ func (service *Service) reportIOletError(device *types.DeviceUpdate, module *typ
 		service.logger.Print(err)
 		return
 	}
-	service.deviceErrors[device.Id] = reportedError
+	service.ioletErrors[iolet.Id] = reportedError
 }
 
 func (service *Service) deleteDeviceError(device *types.DeviceUpdate, deviceError *types.Error) {

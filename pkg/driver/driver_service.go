@@ -105,6 +105,7 @@ func (service *Service) reportUpdate(device *types.DeviceUpdate) {
 }
 
 func (service *Service) reportError(newError *types.PubError) (*types.Error, error) {
+	service.logger.Print("report new error: ", *newError)
 	body, err := json.Marshal(newError)
 	if err != nil {
 		return nil, err
@@ -134,7 +135,9 @@ func (service *Service) reportError(newError *types.PubError) (*types.Error, err
 }
 
 func (service *Service) deleteError(oldError *types.Error) error {
-	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/api/notify/error/%d", service.gateway, oldError.ErrorId), nil)
+	service.logger.Print("delete error: ", *oldError)
+	reader := bytes.NewReader([]byte(""))
+	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/api/notify/error/%d", service.gateway, oldError.ErrorId), reader)
 	if err != nil {
 		return err
 	}
@@ -146,7 +149,7 @@ func (service *Service) deleteError(oldError *types.Error) error {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("could not create error: %s", res.Status)
+		return fmt.Errorf("could not delete error: %s", res.Status)
 	}
 	return nil
 }

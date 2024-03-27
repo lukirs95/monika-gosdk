@@ -12,7 +12,7 @@ import (
 
 func main() {
 	gatewayEndpoint := "http://127.0.0.1:8080"
-	mockProvider := NewMockProvider(types.DeviceType__GENERIC_DUMMY)
+	mockProvider := NewMockProvider(types.DeviceType__GENERIC_DUMMY, 1)
 	mockProvider.FetchDevices(context.Background())
 	mockDriver, err := driver.NewDriver(mockProvider)
 	if err != nil {
@@ -22,7 +22,10 @@ func main() {
 
 	mockService := driver.NewService(gatewayEndpoint, mockDriver, log.Default())
 
+	mockService.AddErrorCheckDevice(checkDevice)
+	mockService.AddErrorCheckModule(checkModule)
 	mockService.AddErrorCheckIOlet(func(iolet *types.IOletUpdate) *types.Error {
+		log.Print("IOlet Checked for errors")
 		if !iolet.Status.Running() {
 			return &types.Error{
 				Severity: types.IOletStatus_HIGH,
@@ -43,4 +46,14 @@ func main() {
 	}
 
 	fmt.Print(mockService.Listen(ctx, 8090, updateChan))
+}
+
+func checkDevice(device *types.DeviceUpdate) *types.Error {
+	// log.Printf("Device %s checked for errors\n", device.Name)
+	return nil
+}
+
+func checkModule(module *types.ModuleUpdate) *types.Error {
+	// log.Printf("Module %s checked for errors\n", module.Name)
+	return nil
 }

@@ -11,18 +11,20 @@ import (
 type MockProvider struct {
 	deviceType types.DeviceType
 	devices    []types.Device
+	length     int
 }
 
-func NewMockProvider(deviceType types.DeviceType) provider.DeviceProvider {
+func NewMockProvider(deviceType types.DeviceType, length int) provider.DeviceProvider {
 
 	return &MockProvider{
 		deviceType: deviceType,
 		devices:    make([]types.Device, 0),
+		length:     length,
 	}
 }
 
 func (provider *MockProvider) FetchDevices(ctx context.Context) error {
-	for i := 0; i < 10; i++ {
+	for i := 0; i < provider.length; i++ {
 		provider.devices = append(provider.devices, types.NewDevice(types.DeviceId(fmt.Sprint(i)), provider.deviceType, fmt.Sprintf("Mock Device %d", i)))
 	}
 	return nil

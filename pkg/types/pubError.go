@@ -1,7 +1,7 @@
 package types
 
 type PubError struct {
-	ErrorId    int64            `json:"errorId,omitempty"`
+	ErrorId    int64            `json:"errorId"`
 	DeviceId   DeviceId         `json:"deviceId"`
 	DeviceType DeviceType       `json:"deviceType"`
 	DeviceName string           `json:"deviceName"`
