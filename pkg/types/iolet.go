@@ -133,6 +133,7 @@ const (
 	IOletStatus_RECEIVING = 0b1 << 2
 	IOletStatus_SENDING   = 0b1 << 3
 	IOletStatus_HIGH      = 0b1 << 4
+	IOletStatus_ENABLED   = 0b1 << 5
 )
 
 func (s IOletStatus) OK() bool {
@@ -173,6 +174,14 @@ func (s IOletStatus) High() bool {
 
 func (s *IOletStatus) SetHigh(high bool) {
 	setFlag(s, IOletStatus_HIGH, high)
+}
+
+func (s IOletStatus) Enabled() bool {
+	return s&IOletStatus_ENABLED > 0
+}
+
+func (s *IOletStatus) SetEnabled(enabled bool) {
+	setFlag(s, IOletStatus_ENABLED, enabled)
 }
 
 func setFlag(reg *IOletStatus, flag IOletStatus, v bool) {
