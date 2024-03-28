@@ -7,6 +7,7 @@ import (
 )
 
 type Device interface {
+	SetId(newId DeviceId)
 	GetId() DeviceId
 	SetName(string)
 	GetName() string
@@ -80,6 +81,10 @@ type DeviceUpdate struct {
 	Name    string         `json:"name"`
 	Status  DeviceStatus   `json:"status"`
 	Modules []ModuleUpdate `json:"modules"`
+}
+
+func (device *deviceImpl) SetId(deviceId DeviceId) {
+	device.Id = deviceId
 }
 
 func (device *deviceImpl) GetId() DeviceId {
