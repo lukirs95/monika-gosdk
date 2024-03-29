@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 )
@@ -12,7 +13,7 @@ type Module interface {
 	GetStatus() ModuleStatus
 	SetStatus(newStatus ModuleStatus)
 	AddAction(newControl ModuleControl, action ModuleAction)
-	FireAction(control ModuleControl) error
+	FireAction(ctx context.Context, control ModuleControl) error
 	AddIOlet(newIOlet IOlet)
 	GetIOletTypes() []IOletType
 	GetIOlets() []IOlet
@@ -91,9 +92,9 @@ func (module *moduleImpl) AddAction(newControl ModuleControl, action ModuleActio
 	module.Controls = append(module.Controls, newControl)
 }
 
-func (module *moduleImpl) FireAction(control ModuleControl) error {
+func (module *moduleImpl) FireAction(ctx context.Context, control ModuleControl) error {
 	if action, ok := module.actions[control]; ok {
-		return action(module)
+		return action(ctx, module)
 	}
 	return fmt.Errorf("no such action defined")
 }
@@ -210,4 +211,4 @@ func (control ModuleControl) Valid() error {
 	return fmt.Errorf("%s is not a valid control", control)
 }
 
-type ModuleAction func(module Module) error
+type ModuleAction func(ctx context.Context, module Module) error

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"sync/atomic"
@@ -18,7 +19,7 @@ type Device interface {
 	SetControlPort(controlPort int)
 	GetControlPort() int
 	AddAction(control DeviceControl, callback DeviceAction)
-	FireAction(control DeviceControl) error
+	FireAction(ctx context.Context, control DeviceControl) error
 	GetModuleTypes() []ModuleType
 	AddModule(module Module)
 	GetModules() []Module
@@ -140,9 +141,9 @@ func (device *deviceImpl) AddAction(newControl DeviceControl, action DeviceActio
 	device.Controls = append(device.Controls, newControl)
 }
 
-func (device *deviceImpl) FireAction(control DeviceControl) error {
+func (device *deviceImpl) FireAction(ctx context.Context, control DeviceControl) error {
 	if action, ok := device.actions[control]; ok {
-		return action(device)
+		return action(ctx, device)
 	}
 	return fmt.Errorf("no such action defined")
 }
@@ -259,4 +260,4 @@ func (control DeviceControl) Valid() error {
 	return fmt.Errorf("%s is not a valid control", control)
 }
 
-type DeviceAction func(device Device) error
+type DeviceAction func(ctx context.Context, device Device) error

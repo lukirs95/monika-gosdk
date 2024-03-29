@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 )
@@ -13,7 +14,7 @@ type IOlet interface {
 	GetStatus() IOletStatus
 	SetStatus(newStatus IOletStatus)
 	AddAction(control IOletControl, action IOletAction)
-	FireAction(control IOletControl) error
+	FireAction(ctx context.Context, control IOletControl) error
 	Updated() *IOletUpdate
 }
 
@@ -86,9 +87,9 @@ func (iolet *ioletImpl) AddAction(newControl IOletControl, action IOletAction) {
 	iolet.Controls = append(iolet.Controls, newControl)
 }
 
-func (iolet *ioletImpl) FireAction(control IOletControl) error {
+func (iolet *ioletImpl) FireAction(ctx context.Context, control IOletControl) error {
 	if action, ok := iolet.actions[control]; ok {
-		return action(iolet)
+		return action(ctx, iolet)
 	}
 	return fmt.Errorf("no such action defined")
 }
@@ -208,4 +209,4 @@ func (control IOletControl) Valid() error {
 	return fmt.Errorf("%s is not a valid control", control)
 }
 
-type IOletAction func(iolet IOlet) error
+type IOletAction func(ctx context.Context, iolet IOlet) error

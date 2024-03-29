@@ -48,7 +48,7 @@ func (service *Service) handleDeviceControl(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := service.driver.RunDeviceControl(deviceId, control); err != nil {
+	if err := service.driver.RunDeviceControl(r.Context(), deviceId, control); err != nil {
 		logRequestError(service.logger, r, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -107,7 +107,7 @@ func (service *Service) handleModuleControl(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := service.driver.RunModuleControl(deviceId, moduleType, moduleId, control); err != nil {
+	if err := service.driver.RunModuleControl(r.Context(), deviceId, moduleType, moduleId, control); err != nil {
 		logRequestError(service.logger, r, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -174,7 +174,7 @@ func (service *Service) handleIOletControl(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := service.driver.RunIOletCommand(deviceId, moduleType, moduleId, ioletType, ioletId, control); err != nil {
+	if err := service.driver.RunIOletCommand(r.Context(), deviceId, moduleType, moduleId, ioletType, ioletId, control); err != nil {
 		logRequestError(service.logger, r, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

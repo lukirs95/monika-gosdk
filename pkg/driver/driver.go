@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"context"
+
 	"github.com/lukirs95/monika-gosdk/pkg/types"
 )
 
@@ -18,7 +20,7 @@ type DeviceDriver interface {
 	// returns one device based on the deviceId
 	GetDevice(deviceId types.DeviceId) types.Device
 	// RunDeviceControl executes the given control command
-	RunDeviceControl(deviceId types.DeviceId, cmd types.DeviceControl) error
+	RunDeviceControl(ctx context.Context, deviceId types.DeviceId, cmd types.DeviceControl) error
 	// returns the moduleTypes the driver has in the system
 	GetModuleTypes(deviceId types.DeviceId) []types.ModuleType
 }
@@ -31,7 +33,7 @@ type ModuleDriver interface {
 	// returns one module based on the moduleId
 	GetModule(deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId) types.Module
 	// RunModuleControl executes the given control command
-	RunModuleControl(deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, cmd types.ModuleControl) error
+	RunModuleControl(ctx context.Context, deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, cmd types.ModuleControl) error
 }
 
 type IOletDriver interface {
@@ -44,5 +46,5 @@ type IOletDriver interface {
 	// returns one IOlet based on the ioletId
 	GetIOlet(deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, ioLetType types.IOletType, ioLetId types.IOletId) types.IOlet
 	// RunIOletCommand executes the given control command
-	RunIOletCommand(deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, ioLetType types.IOletType, ioLetId types.IOletId, cmd types.IOletControl) error
+	RunIOletCommand(ctx context.Context, deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, ioLetType types.IOletType, ioLetId types.IOletId, cmd types.IOletControl) error
 }

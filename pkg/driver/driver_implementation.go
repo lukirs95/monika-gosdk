@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/lukirs95/monika-gosdk/pkg/provider"
@@ -37,10 +38,10 @@ func (m *driverImpl) GetDevice(deviceId types.DeviceId) types.Device {
 	}
 	return nil
 }
-func (m *driverImpl) RunDeviceControl(deviceId types.DeviceId, cmd types.DeviceControl) error {
+func (m *driverImpl) RunDeviceControl(ctx context.Context, deviceId types.DeviceId, cmd types.DeviceControl) error {
 	for _, device := range m.devices {
 		if device.GetId() == deviceId {
-			return device.FireAction(cmd)
+			return device.FireAction(ctx, cmd)
 		}
 	}
 	return fmt.Errorf("device not found")
@@ -82,7 +83,7 @@ func (m *driverImpl) GetModule(deviceId types.DeviceId, moduleType types.ModuleT
 	return nil
 }
 
-func (m *driverImpl) RunModuleControl(deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, cmd types.ModuleControl) error {
+func (m *driverImpl) RunModuleControl(ctx context.Context, deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, cmd types.ModuleControl) error {
 	var module types.Module
 	for _, device := range m.devices {
 		if device.GetId() == deviceId {
@@ -94,7 +95,7 @@ func (m *driverImpl) RunModuleControl(deviceId types.DeviceId, moduleType types.
 		return fmt.Errorf("module not found")
 	}
 
-	return module.FireAction(cmd)
+	return module.FireAction(ctx, cmd)
 }
 
 func (m *driverImpl) GetIOletTypes(deviceId types.DeviceId, moduleId types.ModuleId) []types.IOletType {
@@ -157,7 +158,7 @@ func (m *driverImpl) GetIOlet(deviceId types.DeviceId, moduleType types.ModuleTy
 	return module.GetIOlet(ioletId)
 }
 
-func (m *driverImpl) RunIOletCommand(deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, ioletType types.IOletType, ioletId types.IOletId, cmd types.IOletControl) error {
+func (m *driverImpl) RunIOletCommand(ctx context.Context, deviceId types.DeviceId, moduleType types.ModuleType, moduleId types.ModuleId, ioletType types.IOletType, ioletId types.IOletId, cmd types.IOletControl) error {
 	var module types.Module
 	for _, device := range m.devices {
 		if device.GetId() == deviceId {
@@ -170,7 +171,7 @@ func (m *driverImpl) RunIOletCommand(deviceId types.DeviceId, moduleType types.M
 	}
 
 	if iolet := module.GetIOlet(ioletId); iolet != nil {
-		return iolet.FireAction(cmd)
+		return iolet.FireAction(ctx, cmd)
 	}
 
 	return fmt.Errorf("iolet not found")
