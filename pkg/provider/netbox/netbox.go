@@ -51,7 +51,7 @@ func (netbox *Netbox) FetchDevices(ctx context.Context) error {
 	}
 
 	for _, resDevice := range allResponses {
-		if resDevice.GetIP() != "" {
+		if resDevice.Include() && resDevice.GetIP() != "" {
 			newDevice := types.NewDevice(resDevice.GetId(), netbox.deviceType, resDevice.Name)
 			newDevice.SetControlIP(resDevice.GetIP())
 			netbox.devices = append(netbox.devices, newDevice)
@@ -77,8 +77,13 @@ func (netbox *Netbox) request(ctx context.Context, endpoint string) ([]json.RawM
 		req.Header.Set("Accept", "application/json")
 		req.Header.Set("Authorization", fmt.Sprintf("TOKEN %s", netbox.apiKey))
 
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
 		var response Response
-		if err := json.NewDecoder(req.Body).Decode(&response); err != nil {
+		if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
 			return nil, err
 		}
 		responses = append(responses, response.Results)

@@ -90,7 +90,7 @@ func (mock *MockDevice) mockUpdate(currentTime time.Time) {
 	mock.triggerUpdate <- mock.device
 }
 
-func (mock *MockDevice) deviceActionBoot(device types.Device) error {
+func (mock *MockDevice) deviceActionBoot(ctx context.Context, device types.Device) error {
 	currentStatus := mock.device.GetStatus()
 	currentStatus.SetONLINE(true)
 	mock.device.SetStatus(currentStatus)
@@ -98,7 +98,7 @@ func (mock *MockDevice) deviceActionBoot(device types.Device) error {
 	return nil
 }
 
-func (mock *MockDevice) deviceActionShutDown(device types.Device) error {
+func (mock *MockDevice) deviceActionShutDown(ctx context.Context, device types.Device) error {
 	currentStatus := mock.device.GetStatus()
 	currentStatus.SetONLINE(false)
 	mock.device.SetStatus(currentStatus)
@@ -106,7 +106,7 @@ func (mock *MockDevice) deviceActionShutDown(device types.Device) error {
 	return nil
 }
 
-func (mock *MockDevice) deviceActionReboot(device types.Device) error {
+func (mock *MockDevice) deviceActionReboot(ctx context.Context, device types.Device) error {
 	currentStatus := mock.device.GetStatus()
 	currentStatus.SetONLINE(false)
 	mock.device.SetStatus(currentStatus)
@@ -121,7 +121,7 @@ func (mock *MockDevice) deviceActionReboot(device types.Device) error {
 	return nil
 }
 
-func (mock *MockDevice) moduleActionStart(module types.Module) error {
+func (mock *MockDevice) moduleActionStart(ctx context.Context, module types.Module) error {
 	currentStatus := module.GetStatus()
 	currentStatus.SetOK(true)
 	module.SetStatus(currentStatus)
@@ -129,7 +129,7 @@ func (mock *MockDevice) moduleActionStart(module types.Module) error {
 	return nil
 }
 
-func (mock *MockDevice) moduleActionStop(module types.Module) error {
+func (mock *MockDevice) moduleActionStop(ctx context.Context, module types.Module) error {
 	currentStatus := module.GetStatus()
 	currentStatus.SetOK(false)
 	module.SetStatus(currentStatus)
@@ -137,7 +137,7 @@ func (mock *MockDevice) moduleActionStop(module types.Module) error {
 	return nil
 }
 
-func (mock *MockDevice) ioletActionStart(iolet types.IOlet) error {
+func (mock *MockDevice) ioletActionStart(ctx context.Context, iolet types.IOlet) error {
 	currentStatus := iolet.GetStatus()
 	currentStatus.SetRunning(true)
 	currentStatus.SetReceiving(true)
@@ -146,7 +146,7 @@ func (mock *MockDevice) ioletActionStart(iolet types.IOlet) error {
 	return nil
 }
 
-func (mock *MockDevice) ioletActionStop(iolet types.IOlet) error {
+func (mock *MockDevice) ioletActionStop(ctx context.Context, iolet types.IOlet) error {
 	currentStatus := iolet.GetStatus()
 	currentStatus.SetRunning(false)
 	currentStatus.SetReceiving(false)

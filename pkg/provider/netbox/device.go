@@ -7,10 +7,13 @@ import (
 	"github.com/lukirs95/monika-gosdk/pkg/types"
 )
 
+const INCLUDE_IDENT = "MONIKA"
+
 type Device struct {
-	Id        int64     `json:"id"`
-	Name      string    `json:"name"`
-	PrimaryIP PrimaryIP `json:"primary_ip"`
+	Id           int64                  `json:"id"`
+	Name         string                 `json:"name"`
+	PrimaryIP    PrimaryIP              `json:"primary_ip"`
+	CustomFields map[string]interface{} `json:"custom_fields"`
 }
 
 type PrimaryIP struct {
@@ -29,4 +32,11 @@ func (d Device) GetName() string {
 func (d Device) GetIP() string {
 	address := strings.Split(d.PrimaryIP.Address, "/")[0]
 	return address
+}
+
+func (d Device) Include() bool {
+	if value, ok := d.CustomFields[INCLUDE_IDENT]; ok {
+		return value.(bool)
+	}
+	return false
 }
